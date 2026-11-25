@@ -43,7 +43,7 @@ export default function PostCard({ post, onChange, onReply }) {
         <div className="post-actions">
           <button className={liked ? 'liked' : ''} onClick={toggleLike}><Heart fill={liked ? 'currentColor' : 'none'} size={18}/><span>{likeCount}</span></button>
           <button onClick={() => onReply?.(post)}><MessageCircle size={18}/><span>{post.replyCount || 0}</span></button>
-          <button onClick={() => navigator.share?.({ title: 'Chirp post', text: post.content, url: location.href })}><Share2 size={18}/></button>
+          <button onClick={() => navigator.share?.({ title: 'Twitter post', text: post.content, url: location.href })}><Share2 size={18}/></button>
           {(post.author._id === user?._id || post.author._id?.toString() === user?._id || user?.role === 'admin') && <button className="delete-action" onClick={remove} aria-label="Delete post"><Trash2 size={17}/></button>}
         </div>
       </div>

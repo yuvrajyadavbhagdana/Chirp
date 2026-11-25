@@ -14,10 +14,10 @@ const start = async () => {
   });
   app.set('io', io);
   const port = process.env.PORT || 5000;
-  server.listen(port, () => console.log(`Chirp API running on http://localhost:${port}`));
+  server.listen(port, () => console.log(`Twitter API running on http://localhost:${port}`));
 };
 
 start().catch((error) => {
-  console.error('Failed to start Chirp:', error.message);
+  console.error('Failed to start Twitter:', error.message);
   process.exit(1);
 });
