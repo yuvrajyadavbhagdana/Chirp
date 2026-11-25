@@ -30,7 +30,7 @@ export function Login() {
 export function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [values, setValues] = useState({ name:'', username:'', email:'', password:'', confirm:'', avatar:'' });
+  const [values, setValues] = useState({ name:'', email:'', password:'', confirm:'', avatar:'' });
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const submit = async (event) => {
@@ -39,8 +39,8 @@ export function Register() {
     if (values.password.length < 8) return Swal.fire({icon:'error', title:'Use at least 8 characters'});
     setLoading(true);
     try {
-      await register(values);
-      await Swal.fire({icon:'success', title:'Welcome to Chirp!', text:'Your account has been created.', confirmButtonColor:'#4f46e5'});
+      const createdUser = await register(values);
+      await Swal.fire({icon:'success', title:'Welcome to Chirp!', text:`Your account has been created. Your username is @${createdUser.username}.`, confirmButtonColor:'#4f46e5'});
       navigate('/home');
     } catch (error) { Swal.fire({icon:'error', title:'Registration failed', text:error.message, confirmButtonColor:'#4f46e5'}); }
     finally { setLoading(false); }
@@ -48,7 +48,6 @@ export function Register() {
   return <AuthLayout title="Join your community" subtitle="Create your Chirp profile">
     <form onSubmit={submit} className="auth-form register-form">
       <label>Full name<div className="input-wrap"><User/><input required value={values.name} onChange={(e)=>setValues({...values,name:e.target.value})}/></div></label>
-      <label>Username<div className="input-wrap"><span className="at">@</span><input required pattern="[A-Za-z0-9_]{3,20}" value={values.username} onChange={(e)=>setValues({...values,username:e.target.value})}/></div></label>
       <label>Email<div className="input-wrap"><Mail/><input type="email" required value={values.email} onChange={(e)=>setValues({...values,email:e.target.value})}/></div></label>
       <label>Password<div className="input-wrap"><Lock/><input type={show?'text':'password'} required minLength="8" value={values.password} onChange={(e)=>setValues({...values,password:e.target.value})}/><button type="button" onClick={()=>setShow(!show)}>{show?<EyeOff/>:<Eye/>}</button></div></label>
       <label>Confirm password<div className="input-wrap"><Lock/><input type={show?'text':'password'} required value={values.confirm} onChange={(e)=>setValues({...values,confirm:e.target.value})}/></div></label>

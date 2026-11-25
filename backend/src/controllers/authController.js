@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateTokens');
+const generateUsername = require('../utils/generateUsername');
 
 const cookieOptions = () => ({
   httpOnly: true,
@@ -10,14 +11,23 @@ const cookieOptions = () => ({
 });
 
 const register = async (req, res) => {
-  const { name, username, email, password, avatar } = req.body;
-  if (!name || !username || !email || !password) return res.status(400).json({ message: 'All required fields must be provided' });
-  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) return res.status(400).json({ message: 'Username must be 3-20 letters, numbers, or underscores' });
+  const { name, password, avatar } = req.body;
+  const email = req.body.email?.trim().toLowerCase();
+  if (!name?.trim() || !email || !password) return res.status(400).json({ message: 'All required fields must be provided' });
   if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters' });
-  if (await User.findOne({ $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }] })) {
-    return res.status(409).json({ message: 'Email or username is already in use' });
+  if (await User.findOne({ email })) {
+    return res.status(409).json({ message: 'Email is already registered' });
   }
-  const user = await User.create({ name, username, email, password, avatar });
+  let username;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const candidate = generateUsername(name);
+    if (!(await User.exists({ username: candidate }))) {
+      username = candidate;
+      break;
+    }
+  }
+  if (!username) return res.status(503).json({ message: 'Could not create a unique username. Please try again.' });
+  const user = await User.create({ name: name.trim(), username, email, password, avatar });
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
   user.refreshToken = refreshToken;
