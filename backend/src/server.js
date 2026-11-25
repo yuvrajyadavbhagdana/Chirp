@@ -6,7 +6,9 @@ const { Server } = require('socket.io');
 const start = async () => {
   await connectDB();
   const server = http.createServer(app);
-  const io = new Server(server, { cors: { origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true } });
+  const io = new Server(server, {
+    cors: { origin: app.get('allowedOrigins'), credentials: true },
+  });
   io.on('connection', (socket) => {
     socket.on('join-feed', (userId) => socket.join(`user:${userId}`));
   });
