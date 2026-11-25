@@ -15,6 +15,8 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [trending, setTrending] = useState([]);
   const [suggested, setSuggested] = useState([]);
+  const [trendingError, setTrendingError] = useState('');
+  const [suggestedError, setSuggestedError] = useState('');
   const [followingFeed, setFollowingFeed] = useState(false);
   const [content, setContent] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
@@ -30,14 +32,27 @@ export default function Home() {
     setLoading(true);
     try {
       const feedPath = followingFeed ? '/posts/feed' : '/posts';
-      const [feed, tags, people] = await Promise.all([
+      const [feedResult, tagsResult, peopleResult] = await Promise.allSettled([
         api.get(feedPath),
         api.get('/hashtags/trending'),
         api.get('/users/suggested'),
       ]);
-      setPosts(feed.posts);
-      setTrending(tags);
-      setSuggested(people);
+      if (tagsResult.status === 'fulfilled') {
+        setTrending(tagsResult.value);
+        setTrendingError('');
+      } else {
+        setTrending([]);
+        setTrendingError(tagsResult.reason?.message || 'Unable to load trending topics');
+      }
+      if (peopleResult.status === 'fulfilled') {
+        setSuggested(peopleResult.value);
+        setSuggestedError('');
+      } else {
+        setSuggested([]);
+        setSuggestedError(peopleResult.reason?.message || 'Unable to load suggested accounts');
+      }
+      if (feedResult.status === 'rejected') throw feedResult.reason;
+      setPosts(feedResult.value.posts);
     } catch (error) { Swal.fire({icon:'error',title:'Could not load feed',text:error.message}); }
     finally { setLoading(false); }
   }, [followingFeed]);
@@ -103,14 +118,14 @@ export default function Home() {
     <Link className="rail-search" to="/search"><Search size={19}/><span>Search Twitter</span></Link>
     <section className="rail-card">
       <h2><TrendingUp size={19}/> What&apos;s happening</h2>
-      {trending.length ? trending.slice(0, 5).map((tag) => <Link className="trend-item" key={tag.tag} to={`/hashtag/${tag.tag}`}>
+      {trendingError ? <p className="rail-empty" role="alert">Could not load trends: {trendingError}</p> : trending.length ? trending.slice(0, 5).map((tag) => <Link className="trend-item" key={tag.tag} to={`/hashtag/${tag.tag}`}>
         <span>Trending in your community</span><strong>#{tag.tag}</strong><small>{tag.count} posts</small>
       </Link>) : <p className="rail-empty">Popular topics will show up here.</p>}
       {trending.length > 5 && <Link className="rail-more" to="/search">Explore more</Link>}
     </section>
     <section className="rail-card suggestions-card">
       <h2>Who to follow</h2>
-      {suggested.length ? suggested.map((person) => <div className="suggestion" key={person._id}>
+      {suggestedError ? <p className="rail-empty" role="alert">Could not load suggestions: {suggestedError}</p> : suggested.length ? suggested.map((person) => <div className="suggestion" key={person._id}>
         <Link className="suggested-person" to={`/profile/${person.username}`}>
           <img src={person.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=252525&color=e7e9ea`} alt={`${person.name} avatar`}/>
           <span><strong>{person.name}</strong><small>@{person.username}</small></span>
