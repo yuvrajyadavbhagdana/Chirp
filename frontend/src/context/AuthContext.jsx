@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import api, { setAccessToken } from '../services/api';
+import api, { setAccessToken, setAuthFailureHandler } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -8,10 +8,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setAuthFailureHandler(() => setUser(null));
     api.post('/auth/refresh').then((data) => {
       setAccessToken(data.accessToken);
       setUser(data.user);
     }).catch(() => {}).finally(() => setLoading(false));
+    return () => setAuthFailureHandler(null);
   }, []);
 
   const login = async (email, password) => {

@@ -53,7 +53,9 @@ export default function Home() {
       }
       if (feedResult.status === 'rejected') throw feedResult.reason;
       setPosts(feedResult.value.posts);
-    } catch (error) { Swal.fire({icon:'error',title:'Could not load feed',text:error.message}); }
+    } catch (error) {
+      if (!error.sessionExpired) Swal.fire({icon:'error',title:'Could not load feed',text:error.message});
+    }
     finally { setLoading(false); }
   }, [followingFeed]);
   useEffect(() => { load(); }, [load]);
@@ -169,7 +171,7 @@ export default function Home() {
         </div>
       </div>
     </form>
-    {loading ? <div className="loading-state"><LoaderCircle className="spin"/> Loading your feed</div> : posts.length ? posts.map((post)=><PostCard key={post._id} post={post} onChange={(id)=>setPosts((current)=>current.filter((item)=>item._id!==id))} onReply={openReply}/>) : <div className="empty-state"><div>✦</div><h2>{followingFeed ? 'Your following feed is quiet' : 'Your feed is ready'}</h2><p>Follow people or share the first post to start the conversation.</p></div>}
+    {loading ? <div className="loading-state"><LoaderCircle className="spin"/> Loading your feed</div> : posts.length ? posts.map((post)=><PostCard key={post._id} post={post} onChange={(id)=>setPosts((current)=>current.filter((item)=>item._id!==id))} onReply={openReply}/>) : <div className="empty-state"><div>✦</div><h2>{followingFeed ? 'Your following feed is quiet' : 'Your feed is ready'}</h2><p>{followingFeed ? 'Follow accounts to see their posts here.' : 'Follow people or share the first post to start the conversation.'}</p>{followingFeed && <Link className="primary-button" to="/search">Find people to follow</Link>}</div>}
     {trending.length>0 && <section className="mobile-trends"><h3>Trending now</h3>{trending.map((tag)=><Link key={tag.tag} to={`/hashtag/${tag.tag}`}><b>#{tag.tag}</b><span>{tag.count} posts</span></Link>)}</section>}
     {replyPost && <div className="reply-panel-backdrop" onMouseDown={(e)=>e.target===e.currentTarget&&setReplyPost(null)}><section className="reply-panel"><button className="close-button" onClick={()=>setReplyPost(null)}>×</button><h2>Replies</h2><article className="reply-context">{replyPost.content}</article><form className="reply-form" onSubmit={submitReply}><input value={reply} maxLength="280" onChange={(e)=>setReply(e.target.value)} placeholder="Write a reply"/><button className="primary-button" disabled={!reply.trim()}>Reply</button></form><div>{replies.map((item)=><article className="reply-item" key={item._id}><img src={item.author.avatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(item.author.name)}`} alt={`${item.author.name} avatar`}/><div><b>{item.author.name}</b><span>@{item.author.username}</span><p>{item.content}</p></div></article>)}</div></section></div>}
   </Layout>;
