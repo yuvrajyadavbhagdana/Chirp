@@ -26,8 +26,12 @@ export default function Layout({ children, rightRail }) {
           <NavLink to={`/profile/${user?.username}`}><User/><span>Profile</span></NavLink>
           {user?.role === 'admin' && <NavLink to="/admin"><Shield/><span>Admin</span></NavLink>}
         </nav>
-        <button className="nav-compose" onClick={() => document.querySelector('.composer textarea')?.focus()}>Tweet</button>
-        <button className="logout-link" onClick={handleLogout}><LogOut/><span>Log out</span></button>
+        <button className="nav-compose" onClick={() => document.querySelector('.composer textarea')?.focus()}>Post</button>
+        <div className="nav-account">
+          <img src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}`} alt=""/>
+          <span><strong>{user?.name}</strong><small>@{user?.username}</small></span>
+          <button type="button" aria-label="Log out" onClick={handleLogout}><LogOut/></button>
+        </div>
       </aside>
       <main className="main-column">{children}</main>
       <aside className="right-rail">{rightRail || (

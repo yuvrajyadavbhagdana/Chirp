@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Image, Video, LoaderCircle, Search, Feather, TrendingUp } from 'lucide-react';
+import { Image, Video, LoaderCircle, Search, Plus, TrendingUp } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -126,7 +126,7 @@ export default function Home() {
       <h1 className="visually-hidden">Home timeline</h1>
       <button className={!followingFeed ? 'feed-tab active' : 'feed-tab'} onClick={() => setFollowingFeed(false)} aria-pressed={!followingFeed}>For you</button>
       <button className={followingFeed ? 'feed-tab active' : 'feed-tab'} onClick={() => setFollowingFeed(true)} aria-pressed={followingFeed}>Following</button>
-      <button className="feed-compose-shortcut" aria-label="Write a post" onClick={() => document.querySelector('.composer textarea')?.focus()}><Feather size={19}/></button>
+      <button className="feed-compose-shortcut" aria-label="Write a post" onClick={() => document.querySelector('.composer textarea')?.focus()}><Plus size={19}/></button>
     </header>
     <form className="composer" onSubmit={createPost}>
       <img src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name||'User')}`} alt="Your avatar"/>
