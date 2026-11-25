@@ -30,12 +30,11 @@ export function Login() {
 export function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [values, setValues] = useState({ name:'', email:'', password:'', confirm:'', avatar:'' });
+  const [values, setValues] = useState({ name:'', email:'', password:'', avatar:'' });
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const submit = async (event) => {
     event.preventDefault();
-    if (values.password !== values.confirm) return Swal.fire({icon:'error', title:'Passwords do not match'});
     if (values.password.length < 8) return Swal.fire({icon:'error', title:'Use at least 8 characters'});
     setLoading(true);
     try {
@@ -50,7 +49,6 @@ export function Register() {
       <label>Full name<div className="input-wrap"><User/><input required value={values.name} onChange={(e)=>setValues({...values,name:e.target.value})}/></div></label>
       <label>Email<div className="input-wrap"><Mail/><input type="email" required value={values.email} onChange={(e)=>setValues({...values,email:e.target.value})}/></div></label>
       <label>Password<div className="input-wrap"><Lock/><input type={show?'text':'password'} required minLength="8" value={values.password} onChange={(e)=>setValues({...values,password:e.target.value})}/><button type="button" onClick={()=>setShow(!show)}>{show?<EyeOff/>:<Eye/>}</button></div></label>
-      <label>Confirm password<div className="input-wrap"><Lock/><input type={show?'text':'password'} required value={values.confirm} onChange={(e)=>setValues({...values,confirm:e.target.value})}/></div></label>
       <label className="check-label terms"><input type="checkbox" required/> I agree to the Terms and Privacy Policy</label>
       <button className="primary-button" disabled={loading}>{loading?'Creating account...':'Create account'}</button>
       <p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p>
