@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Image, Smile, LoaderCircle } from 'lucide-react';
+import { Image, LoaderCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import PostCard from '../components/PostCard';
+import EmojiPicker from '../components/EmojiPicker';
 
 export default function Home() {
   const { user } = useAuth();
@@ -51,7 +52,7 @@ export default function Home() {
     <header className="feed-header"><h1>Home</h1></header>
     <form className="composer" onSubmit={createPost}>
       <img src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name||'User')}`} alt="Your avatar"/>
-      <div><textarea value={content} maxLength="280" onChange={(e)=>setContent(e.target.value)} placeholder="What is happening?"/><div className="composer-footer"><div><button type="button" aria-label="Add image"><Image/></button><button type="button" aria-label="Add emoji"><Smile/></button></div><div><span className={content.length>240?'counter warn':''}>{280-content.length}</span><button className="primary-button" disabled={!content.trim()||posting}>{posting?'Posting...':'Post'}</button></div></div></div>
+      <div><textarea value={content} maxLength="280" onChange={(e)=>setContent(e.target.value)} placeholder="What is happening?"/><div className="composer-footer"><div><button type="button" aria-label="Add image"><Image/></button><EmojiPicker value={content} onChange={setContent}/></div><div><span className={content.length>240?'counter warn':''}>{280-content.length}</span><button className="primary-button" disabled={!content.trim()||posting}>{posting?'Posting...':'Post'}</button></div></div></div>
     </form>
     {loading ? <div className="loading-state"><LoaderCircle className="spin"/> Loading your feed</div> : posts.length ? posts.map((post)=><PostCard key={post._id} post={post} onChange={(id)=>setPosts((current)=>current.filter((item)=>item._id!==id))} onReply={openReply}/>) : <div className="empty-state"><div>✦</div><h2>Your feed is ready</h2><p>Follow people or share the first post to start the conversation.</p></div>}
     {trending.length>0 && <section className="mobile-trends"><h3>Trending now</h3>{trending.map((tag)=><Link key={tag.tag} to={`/hashtag/${tag.tag}`}><b>#{tag.tag}</b><span>{tag.count} posts</span></Link>)}</section>}
