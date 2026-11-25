@@ -1,10 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Bell, Bookmark, Home, Search, Shield, User, LogOut } from 'lucide-react';
-import BrandMark from './BrandMark';
+import { Bell, Home, Search, Shield, User, UserPlus, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
+import BrandMark from './BrandMark';
 
-export default function Layout({ children }) {
+export default function Layout({ children, rightRail }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const handleLogout = async () => {
@@ -20,8 +20,9 @@ export default function Layout({ children }) {
         <NavLink to="/home" className="brand" aria-label="Twitter home"><BrandMark/><span>Twitter</span></NavLink>
         <nav>
           <NavLink to="/home"><Home/><span>Home</span></NavLink>
-          <NavLink to="/search"><Search/><span>Search</span></NavLink>
+          <NavLink to="/search"><Search/><span>Explore</span></NavLink>
           <NavLink to="/notifications"><Bell/><span>Notifications</span></NavLink>
+          <NavLink to="/search"><UserPlus/><span>Follow</span></NavLink>
           <NavLink to={`/profile/${user?.username}`}><User/><span>Profile</span></NavLink>
           {user?.role === 'admin' && <NavLink to="/admin"><Shield/><span>Admin</span></NavLink>}
         </nav>
@@ -29,9 +30,9 @@ export default function Layout({ children }) {
         <button className="logout-link" onClick={handleLogout}><LogOut/><span>Log out</span></button>
       </aside>
       <main className="main-column">{children}</main>
-      <aside className="right-rail">
+      <aside className="right-rail">{rightRail || (
         <div className="profile-mini"><img src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Twitter')}`} alt={`${user?.name || 'User'} avatar`}/><div><strong>{user?.name}</strong><span>@{user?.username}</span></div></div>
-      </aside>
+      )}</aside>
       <nav className="bottom-nav">
         <NavLink to="/home"><Home/></NavLink><NavLink to="/search"><Search/></NavLink><NavLink to="/notifications"><Bell/></NavLink><NavLink to={`/profile/${user?.username}`}><User/></NavLink>
       </nav>

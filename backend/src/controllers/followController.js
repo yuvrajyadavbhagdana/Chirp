@@ -2,6 +2,16 @@ const Follow = require('../models/Follow');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 
+const getSuggestions = async (req, res) => {
+  const following = await Follow.find({ follower: req.user._id }).select('following');
+  const excludedIds = [req.user._id, ...following.map((follow) => follow.following)];
+  const users = await User.find({ _id: { $nin: excludedIds } })
+    .select('name username avatar')
+    .sort({ createdAt: -1 })
+    .limit(3);
+  res.json(users);
+};
+
 const followUser = async (req, res) => {
   if (req.params.id === req.user._id.toString()) return res.status(400).json({ message: 'You cannot follow yourself' });
   const target = await User.findById(req.params.id);
@@ -35,4 +45,4 @@ const getFollowing = async (req, res) => {
   res.json({ users: links.map((link) => link.following) });
 };
 
-module.exports = { followUser, unfollowUser, getFollowers, getFollowing };
+module.exports = { getSuggestions, followUser, unfollowUser, getFollowers, getFollowing };

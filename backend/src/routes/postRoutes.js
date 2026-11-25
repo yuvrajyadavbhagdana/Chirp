@@ -6,6 +6,7 @@ const replies = require('../controllers/replyController');
 router.use(protect);
 router.route('/').post(posts.createPost).get(posts.getPosts);
 router.get('/feed', posts.getFeed);
+router.get('/:id/likes', posts.getLikes);
 router.route('/:id').get(posts.getPost).delete(posts.deletePost);
 router.post('/:id/like', posts.likePost);
 router.delete('/:id/like', posts.unlikePost);

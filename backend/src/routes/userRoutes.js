@@ -5,6 +5,7 @@ const follows = require('../controllers/followController');
 
 router.use(protect);
 router.put('/profile', users.updateProfile);
+router.get('/suggested', follows.getSuggestions);
 router.get('/:username', users.getProfile);
 router.get('/:username/posts', users.getUserPosts);
 router.get('/:username/followers', follows.getFollowers);

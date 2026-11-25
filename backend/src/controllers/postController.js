@@ -1,6 +1,8 @@
 const Post = require('../models/Post');
 const Follow = require('../models/Follow');
 const Notification = require('../models/Notification');
+const isHttpUrl = require('../utils/isHttpUrl');
+const isVideoSource = require('../utils/isVideoSource');
 
 const addPostData = async (posts, userId) => posts.map((post) => ({
   ...post.toObject(),
@@ -8,10 +10,23 @@ const addPostData = async (posts, userId) => posts.map((post) => ({
 }));
 
 const createPost = async (req, res) => {
-  const content = req.body.content?.trim();
-  if (!content) return res.status(400).json({ message: 'Post content is required' });
+  const content = typeof req.body.content === 'string' ? req.body.content.trim() : '';
+  const imageUrl = typeof req.body.imageUrl === 'string' ? req.body.imageUrl.trim() : '';
+  const videoUrl = typeof req.body.videoUrl === 'string' ? req.body.videoUrl.trim() : '';
+  if (!content && !imageUrl && !videoUrl) {
+    return res.status(400).json({ message: 'Post content or media is required' });
+  }
   if (content.length > 280) return res.status(400).json({ message: 'Posts cannot exceed 280 characters' });
-  const post = await Post.create({ author: req.user._id, content });
+  if (imageUrl && videoUrl) {
+    return res.status(400).json({ message: 'A post can contain either an image or a video, not both' });
+  }
+  if (imageUrl && !isHttpUrl(imageUrl)) {
+    return res.status(400).json({ message: 'Image URL must be a valid HTTP or HTTPS URL' });
+  }
+  if (videoUrl && !isVideoSource(videoUrl)) {
+    return res.status(400).json({ message: 'Video URL must be HTTP/HTTPS or a supported app video path' });
+  }
+  const post = await Post.create({ author: req.user._id, content, imageUrl, videoUrl });
   await post.populate('author', 'name username avatar');
   res.status(201).json({ ...post.toObject(), isLiked: false });
 };
@@ -47,6 +62,12 @@ const getPost = async (req, res) => {
   res.json({ ...post.toObject(), isLiked: post.likes.some((id) => id.toString() === req.user._id.toString()) });
 };
 
+const getLikes = async (req, res) => {
+  const post = await Post.findById(req.params.id).populate('likes', 'name username avatar');
+  if (!post) return res.status(404).json({ message: 'Post not found' });
+  res.json({ users: post.likes.filter(Boolean) });
+};
+
 const deletePost = async (req, res) => {
   const post = await Post.findById(req.params.id);
   if (!post) return res.status(404).json({ message: 'Post not found' });
@@ -79,4 +100,4 @@ const unlikePost = async (req, res) => {
   res.json({ liked: false, likeCount: post.likes.length });
 };
 
-module.exports = { createPost, getFeed, getPosts, getPost, deletePost, likePost, unlikePost };
+module.exports = { createPost, getFeed, getPosts, getPost, getLikes, deletePost, likePost, unlikePost };
