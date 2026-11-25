@@ -61,10 +61,9 @@ After seeding:
 
 1. Import the same GitHub repository into Vercel and set **Root Directory** to `frontend`.
 2. Use `npm run build` as the build command and `dist` as the output directory.
-3. Set `VITE_API_URL` to the Render API base URL ending in `/api`, for example `https://<your-render-service>.onrender.com/api`.
-4. Deploy the frontend. Add its exact production origin to Render's `CLIENT_URL` if it differs from the value set earlier, then redeploy the API.
+3. Deploy the frontend. `frontend/vercel.json` proxies `/api/*` requests to the Render API, so no `VITE_API_URL` variable is needed on Vercel.
 
-The `frontend/vercel.json` rewrite supports client-side routes such as profile and hashtag pages. The API uses secure cross-site refresh cookies in production, so keep both deployments on HTTPS and set `CLIENT_URL` to the frontend origin.
+The Vercel rewrite also supports client-side routes such as profile and hashtag pages. The app uses a same-origin API proxy in production, keeping refresh cookies on the Vercel site and avoiding browser CORS issues.
 
 ## Production notes
 
